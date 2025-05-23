@@ -1,42 +1,32 @@
-# Laporan Proyek Machine Learning - Nama Anda
+# Recommendation System for Indonesia Tourism Destination - Fatih El Haq
 
 ## Project Overview
 
-Pada bagian ini, Kamu perlu menuliskan latar belakang yang relevan dengan proyek yang diangkat.
+Indonesia's tourism sector plays a crucial role in its economy, contributing significantly to foreign exchange revenues and regional development (The Jakarta Post, 2018). However, the abundance of diverse destinations across the archipelago often overwhelms potential visitors, leading to decision fatigue. This challenge underscores the necessity for an effective recommendation system that can assist tourists in selecting destinations that align with their preferences and interests.
 
-**Rubrik/Kriteria Tambahan (Opsional)**:
-- Jelaskan mengapa dan bagaimana masalah tersebut harus diselesaikan
-- Menyertakan hasil riset terkait atau referensi. Referensi yang diberikan harus berasal dari sumber yang kredibel dan author yang jelas.
-- Format Referensi dapat mengacu pada penulisan sitasi [IEEE](https://journals.ieeeauthorcenter.ieee.org/wp-content/uploads/sites/7/IEEE_Reference_Guide.pdf), [APA](https://www.mendeley.com/guides/apa-citation-guide/) atau secara umum seperti [di sini](https://penerbitdeepublish.com/menulis-buku-membuat-sitasi-dengan-mudah/)
-- Sumber yang bisa digunakan [Scholar](https://scholar.google.com/)
+Recent studies have demonstrated the effectiveness of various recommendation algorithms in enhancing the tourism experience. For instance, a study on Bali's tourism sector employed a Weighted Hybrid method combining Collaborative Filtering and Content-Based approaches, yielding improved accuracy in destination suggestions (Pratama et al., 2023). Similarly, research focused on Madura Island utilized a Collaborative Filtering-based system with modified Cosine similarity and Convolutional Neural Networks, achieving a low RMSE of 0.2579, indicating precise personalized recommendations (Permana et al., 2024). 
+The implementation of such systems is increasingly relevant in the context of e-tourism, which emphasizes the integration of advanced technologies like Artificial Intelligence and Big Data to enhance tourism experiences (Samara et al., 2020). By adopting these technologies, Indonesia can offer tailored travel suggestions that cater to individual preferences, thereby improving tourist satisfaction and supporting sustainable tourism development.
+
+In conclusion, addressing the information overload faced by tourists through personalized recommendation systems is essential for optimizing travel experiences in Indonesia (Pratama et al., 2023). Leveraging advanced algorithms and technologies will not only assist tourists in making informed decisions but also contribute to the sustainable growth of the nation's tourism industry.
 
 ## Business Understanding
 
-Pada bagian ini, Anda perlu menjelaskan proses klarifikasi masalah.
-
-Bagian laporan ini mencakup:
+Indonesia's tourism sector offers a wide range of destinations, from natural wonders and cultural heritage sites to modern entertainment venues. Despite this diversity, many domestic and international tourists face difficulties in identifying destinations that align with their interests, largely due to the overwhelming number of options and the absence of personalized guidance. This situation often leads to inefficient travel planning and underutilization of tourism potential. Fortunately, available datasets include curated information on Indonesian tourism destinations, their categories, and user-generated ratings, offering an opportunity to develop a data-driven recommendation system.
 
 ### Problem Statements
-
-Menjelaskan pernyataan masalah:
-- Pernyataan Masalah 1
-- Pernyataan Masalah 2
-- Pernyataan Masalah n
+To address the challenges in personalized destination discovery, this project defines the following problem statements:
+- How can a personalized destination recommendation system be created using content-based filtering techniques based on destination data?
+- How can other potentially preferred and unvisited destinations be recommended to users based on existing ratings data?
 
 ### Goals
+To answer the problem statements, the project aims to achieve the following goals:
+- Develop a personalized recommendation system that suggests destinations similar to user preferences using content-based filtering.
+- Recommend destinations that match user preferences and have not yet been visited by leveraging collaborative filtering techniques.
 
-Menjelaskan tujuan proyek yang menjawab pernyataan masalah:
-- Jawaban pernyataan masalah 1
-- Jawaban pernyataan masalah 2
-- Jawaban pernyataan masalah n
-
-Semua poin di atas harus diuraikan dengan jelas. Anda bebas menuliskan berapa pernyataan masalah dan juga goals yang diinginkan.
-
-**Rubrik/Kriteria Tambahan (Opsional)**:
-- Menambahkan bagian “Solution Approach” yang menguraikan cara untuk meraih goals. Bagian ini dibuat dengan ketentuan sebagai berikut: 
-
-    ### Solution statements
-    - Mengajukan 2 atau lebih solution approach (algoritma atau pendekatan sistem rekomendasi).
+### Solution Statements
+To achieve these goals, the project applies two recommendation system approaches:
+- **Content-Based Filtering**: Utilizes TF-IDF Vectorizer to transform destination text attributes into weighted numerical vectors and applies Cosine Similarity to calculate the similarity between these vectors, enabling the system to recommend destinations similar to those preferred by the user.
+- **Collaborative Filtering**: Implements RecommenderNet, a deep learning model that captures latent features from user-place interaction data (ratings) to predict preferences for unrated destinations, thereby supporting personalized recommendations.
 
 ## Data Understanding
 Paragraf awal bagian ini menjelaskan informasi mengenai jumlah data, kondisi data, dan informasi mengenai data yang digunakan. Sertakan juga sumber atau tautan untuk mengunduh dataset. Contoh: [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Restaurant+%26+consumer+data).
@@ -69,6 +59,17 @@ Tahapan ini membahas mengenai model sisten rekomendasi yang Anda buat untuk meny
 Pada bagian ini Anda perlu menyebutkan metrik evaluasi yang digunakan. Kemudian, jelaskan hasil proyek berdasarkan metrik evaluasi tersebut.
 
 Ingatlah, metrik evaluasi yang digunakan harus sesuai dengan konteks data, problem statement, dan solusi yang diinginkan.
+
+## References
+Permana, K. E., Rahmat, A. B., Wicaksana, D. A., & Ardianto, D. (2024). Collaborative filtering-based Madura Island tourism recommendation system using RecommenderNet. BIO Web of Conferences, 146, 01080. https://doi.org/10.1051/bioconf/202414601080
+
+Pratama, D. E., Nurjanah, D., & Nurrahmi, H. (2023). Tourism Recommendation System using Weighted Hybrid Method in Bali Island. JURNAL MEDIA INFORMATIKA BUDIDARMA, 7(3), 1189. https://doi.org/10.30865/mib.v7i3.6409
+
+Samara, D., Magnisalis, I., & Peristeras, V. (2020). Artificial intelligence and big data in tourism: A systematic literature review. Journal of Hospitality and Tourism Technology, 11(2), 343–367. https://doi.org/10.1108/jhtt-12-2018-0118
+
+The Jakarta Post. (2018, October 23). Indonesian tourism set to beat Thailand in 5 years. The Jakarta Post. https://www.thejakartapost.com/news/2018/10/23/indonesian-tourism-set-to-beat-thailand-in-5-years.html
+
+
 
 **Rubrik/Kriteria Tambahan (Opsional)**: 
 - Menjelaskan formula metrik dan bagaimana metrik tersebut bekerja.
