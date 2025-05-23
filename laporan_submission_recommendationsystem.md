@@ -271,10 +271,11 @@ recommended_place_ids = place_enc.inverse_transform(top_place_indexes)
 ```
 
 **Output Example**
+
 User Information
-User ID : 34
-Age : 31
-Location : Sragen, Jawa Tengah
+* User ID : 34
+* Age : 31
+* Location : Sragen, Jawa Tengah
 
 Top 5 Places Already Visited by User
 | Place\_Name          | Place\_Ratings | Category      | City       |
@@ -298,6 +299,9 @@ Top 10 New Place Recommendations
 | Pantai Baron                      | Bahari        | Yogyakarta |
 | Geoforest Watu Payung Turunan     | Cagar Alam    | Yogyakarta |
 | Masjid Agung Trans Studio Bandung | Tempat Ibadah | Bandung    |
+
+
+Recommendation output shows relevant destinations recommendation related to the visited destinations. For example, visited destinations show that user mostly visited Taman Hiburan and Budaya destinations and the recommendation gives unvisited destinations that come from Budaya and Taman Hiburan category. This shows that the recommendation system using Collaborative Filtering approach give good recommendation to the user preferences.
 
 **Pros and Cons**
 
@@ -347,7 +351,7 @@ These results indicate that, on average, the predicted ratings deviate by approx
 </div>
 <br>
 
-During model training, Image 5 shows a consistent reduction in both training and validation MAE. The validation MAE decreased from approximately 3.10 to 1.22 over the course of training, aligning with the test MAE result and indicating good generalization to unseen data.
+During model training, Image 5 shows a consistent reduction in both training and validation MAE. The validation MAE decreased from approximately 3.10 to 1.22 over the course of training, aligning with the test MAE result and indicating good generalization to unseen data. Therefor, the recommendation system using Model 2 shows good result based on the metric (MAE) and is appropriate to give recommendation for Indonesia Tourism destinations.
 
 ## References
 Permana, K. E., Rahmat, A. B., Wicaksana, D. A., & Ardianto, D. (2024). Collaborative filtering-based Madura Island tourism recommendation system using RecommenderNet. BIO Web of Conferences, 146, 01080. https://doi.org/10.1051/bioconf/202414601080
