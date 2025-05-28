@@ -387,9 +387,117 @@ Collaborative filtering is effective when user feedback (like ratings) is abunda
 
 ## Evaluation
 
+### Evaluation Model 1 - Content-based Filtering
+For evaluating the content-based filtering model, several key metrics can be used to assess the quality of recommendations. These metrics focus on how relevant and well-ranked the recommended items are. Below is an explanation of each metric, the formula, the code used, and the interpretation.
+
+#### Precision@K
+Precision@K measures how many recommended items in the top-K are actually relevant. It is calculated by taking the number of relevant items in the recommended list (intersecting the recommended and actual visited places) and dividing it by K. The formula is: 
+
+$$\text{Recall@K} = \frac{|\text{Recommended@K} \cap \text{Actual}|}{|\text{Actual}|}$$
+
+To calculate this metric, the code below first takes the top-K recommendations from `recommended_place_names`, converts them into a set, and intersects it with the set of `actual_visited_places`. This value is then divided by K to give the precision score. A higher precision indicates more accurate recommendations. However, it doesn’t account for how many relevant items were missed.
+
+```python
+def precision_at_k(recommended_ids, actual_ids, k):
+    recommended_at_k = list(recommended_ids)[:k]
+    hits = len(set(recommended_at_k) & set(actual_ids))
+    return hits / k
+```
+
+#### Recall@K
+Recall@K looks at how many of the actual relevant items (places a user has actually visited) were correctly recommended in the top-K. It is calculated by dividing the number of relevant recommended items by the total number of actual relevant items. The formula is:
+
+$$\text{Recall@K} = \frac{|\text{Recommended@K} \cap \text{Actual}|}{|Actual|}$$
+
+To calculate this metric, The code below uses a similar approach to precision, but the denominator is the length of `actual_visited_places`. A higher recall means more of the user’s true interests were captured, but it might sacrifice precision.
+```python
+def recall_at_k(recommended_ids, actual_ids, k):
+    recommended_at_k = list(recommended_ids)[:k]
+    hits = len(set(recommended_at_k) & set(actual_ids))
+    return hits / len(actual_ids) if actual_ids else 0
+```
+#### F1-Score@K
+F1-Score@K balances precision and recall by taking their harmonic mean. The formula is:
+
+$$\text{F1} = 2 * \frac{Precision * Recall}{Precision / Recall}$$
+
+This metric provides a single score to show how well the model balances correctness and completeness. To calculate this metric, The code below calls `f1_at_k(precision, recall)` to compute this. A high F1-Score means the model is both accurate and comprehensive.
+```python
+def f1_at_k(precision, recall):
+    return 2 * (precision * recall) / (precision + recall) if (precision + recall) else 0
+```
+#### Mean Average Precision (MAP)
+Mean Average Precision (MAP@K) calculates the average of precision scores at each relevant item position within the top-K. It rewards models that recommend relevant items earlier in the list. The formula is:
+
+$$\text{MAP} = \frac{1}{|\text{Actual}|} \sum_{i=1}^{K} P(i) \times \text{rel}(i)$$
+
+Where:
+* $P(i)$ is the **precision at position** $i$.
+* $\text{rel}(i)$ is 1 if the item at position $i$ is **relevant**, otherwise it is 0.
+
+To calculate this metric, The code below iterates through the recommended list, accumulates precision at relevant positions, and averages over the number of relevant items.
+```python
+def average_precision(recommended_ids, actual_ids, k):
+    score = 0.0
+    hits = 0
+    for i, item in enumerate(list(recommended_ids)[:k]):
+        if item in actual_ids:
+            hits += 1
+            score += hits / (i + 1)
+    return score / min(len(actual_ids), k) if actual_ids else 0
+```
+
+#### NDCG (Normalized Discounted Cumulative Gain)
+NDCG evaluates the ranking quality by giving higher scores to relevant items appearing earlier in the recommendation list. It discounts relevant items by their position.
+
+$$\text{NDCG@K} = \frac{\text{DCG@K}}{\text{IDCG@K}}$$
+
+Where:
+* $$\text{DCG@K} = \sum_{i=1}^K \frac{rel(i)}{\log_2(i+1)}$$
+* $$\text{IDCG@K} = \sum_{i=1}^{|\text{Actual}|} \frac{1}{\log_2(i+1)}$$
+* $\text{rel}_i = 1$ if the item at position $i$ is relevant, else 0.
+
+NDCG tells how good a ranked list of recommendations is by considering both the relevance of items and their order. It starts with DCG (Discounted Cumulative Gain), which adds up the relevance of each recommended item, but gives higher weight to items that appear near the top of the list. Then, IDCG (Ideal DCG) is the maximum possible DCG if all relevant items were at the top. It helps compare how close the list is to perfect. Finally, NDCG@K divides DCG by IDCG to get a score between 0 and 1 that means 1 means a perfect ranking (all relevant items at the top) and closer to 0 means a poor ranking.
+
+To calculate this metric, The code below sums discounted gains for recommended relevant items and normalizes by the ideal DCG.
+
+```python
+def ndcg_at_k(recommended_ids, actual_ids, k):
+    dcg = 0.0
+    for i, item in enumerate(list(recommended_ids)[:k]):
+        if item in actual_ids:
+            dcg += 1 / np.log2(i + 2)
+    idcg = sum(1 / np.log2(i + 2) for i in range(min(len(actual_ids), k)))
+    return dcg / idcg if idcg > 0 else 0
+```
+
+### Interpretation of Results
+After computing these metrics using the recommendation results and actual relevant places, values closer to 1 indicate better performance. For example if user was visited Waterpark Kenjeran Surabaya, the metric values are:
+- Precision@10 = 0.9 means 90% of the top-10 recommended places are relevant.
+- Recall@10 = 0.0247 is low, indicating the model covers only a small portion of all relevant places.
+- F1-Score@10 = 0.0480 is low due to the low recall.
+- MAP@10 = 0.8664 shows most relevant items are ranked near the top.
+- NDCG@10 = 0.9266 confirms good ranking quality, prioritizing relevant places early.
+
+This indicates that the content-based filtering model provides accurate and well-ranked recommendations but misses many relevant items (low recall). This suggests good recommendation quality for a narrow set of items but could benefit from improvements to increase coverage.
+
+### Metric Visualization
+
+**Image 5 Metric Visualization (Content-based)**
+<div align="left">
+    <img src="https://raw.githubusercontent.com/eru2024/laskarai-mlt-recommendationsystem/master/img/eval_content.jpg" alt="img" width="100%">
+</div>
+<br>
+
+Based on Image 5, this content-based filtering model appears to be highly precise, especially for a small number of recommendations (low K). It excels at identifying items that are very similar to what a user has already liked and placing them at the top of the recommendation list. This leads to strong Precision@K, MAP@K, and NDCG@K scores when K is small.
+
+However, the system suffers from low recall. This means it might be limited in its ability to discover a broad range of relevant items for the user, potentially recommending only items very similar to existing preferences and missing out on novel or diverse relevant items that might be outside its narrowly defined content profile. This is a common characteristic of pure content-based systems, which can lead to a "filter bubble" effect.
+
+### Evaluation Model 2 - Collaborative Filtering
+
 To assess the performance of the collaborative filtering model (RecommenderNet), two evaluation metrics are used: Mean Squared Error (MSE) and Mean Absolute Error (MAE). Both metrics are standard in regression tasks and are well-suited for rating prediction problems in recommendation systems.
 
-### **Mean Squared Error (MSE)**
+#### **Mean Squared Error (MSE)**
 MSE measures the average of the squares of the errors between the predicted and actual values. It penalizes larger errors more than smaller ones due to squaring. The formula is:
 
 $$
@@ -400,7 +508,7 @@ where is $$y_i$$  the actual rating, and $$\hat{y}_i$$ is the predicted rating.
 
 A practical interpretation of MSE is: if MSE is 2.13, then the average squared difference between predicted and actual ratings is 2.13. Although the scale is squared, it still reflects how far off predictions are on average.
 
-### **Mean Absolute Error (MAE)** 
+#### **Mean Absolute Error (MAE)** 
 MAE computes the average of the absolute differences between predicted and true values. It is easier to interpret because it is in the same unit as the ratings. The formula is:
 
 $$
@@ -409,7 +517,7 @@ $$
 
 For example, an MAE of 1.24 indicates that, on average, the model's predictions differ from the actual ratings by 1.24 points on the 1–5 rating scale.
 
-### **Evaluation Results**
+#### **Evaluation Results**
 
 After training the RecommenderNet model, predictions were generated on the test dataset. Since the model outputs were not naturally bounded within the 1–5 rating range, a min-max normalization step was applied to scale the predictions accordingly. This ensured comparability with the actual ratings.
 
@@ -421,15 +529,18 @@ The evaluation metrics on the test set are:
 
 These results indicate that, on average, the predicted ratings deviate by approximately 1.25 rating points from the actual values. The MSE further confirms that the model’s errors are moderately distributed but not extremely large.
 
-### **Model Training History**
+#### **Model Training History**
 
-**Image 5 Metric Visualization**
+**Image 6 Metric Visualization (Collaborative)**
 <div align="left">
     <img src="https://raw.githubusercontent.com/eru2024/laskarai-mlt-recommendationsystem/master/img/eval_history.jpg" alt="img" width="50%">
 </div>
 <br>
 
 During model training, Image 5 shows a consistent reduction in both training and validation MAE. The validation MAE decreased from approximately 3.10 to 1.22 over the course of training, aligning with the test MAE result and indicating good generalization to unseen data. Therefor, the recommendation system using Model 2 shows good result based on the metric (MAE) and is appropriate to give recommendation for Indonesia Tourism destinations.
+
+## Conclusion
+
 
 ## References
 Permana, K. E., Rahmat, A. B., Wicaksana, D. A., & Ardianto, D. (2024). Collaborative filtering-based Madura Island tourism recommendation system using RecommenderNet. BIO Web of Conferences, 146, 01080. https://doi.org/10.1051/bioconf/202414601080
