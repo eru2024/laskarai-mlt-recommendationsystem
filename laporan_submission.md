@@ -491,7 +491,7 @@ This indicates that the content-based filtering model provides accurate and well
 
 Based on Image 5, this content-based filtering model appears to be highly precise, especially for a small number of recommendations (low K). It excels at identifying items that are very similar to what a user has already liked and placing them at the top of the recommendation list. This leads to strong Precision@K, MAP@K, and NDCG@K scores when K is small.
 
-However, the system suffers from low recall. This means it might be limited in its ability to discover a broad range of relevant items for the user, potentially recommending only items very similar to existing preferences and missing out on novel or diverse relevant items that might be outside its narrowly defined content profile. This is a common characteristic of pure content-based systems, which can lead to a "filter bubble" effect.
+However, the system suffers from low recall. This means it might be limited in its ability to discover a broad range of relevant items for the user, potentially recommending only items very similar to existing preferences and missing out on novel or diverse relevant items that might be outside its narrowly defined content profile. This is a common characteristic of pure content-based systems, which can lead to a "filter bubble" effect which happens when a system shows users similar things over and over based on what users had liked before or what similar users liked. This means users might miss out on other different or new things.
 
 ### Evaluation Model 2 - Collaborative Filtering
 
