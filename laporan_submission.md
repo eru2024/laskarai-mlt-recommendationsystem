@@ -540,7 +540,17 @@ These results indicate that, on average, the predicted ratings deviate by approx
 During model training, Image 5 shows a consistent reduction in both training and validation MAE. The validation MAE decreased from approximately 3.10 to 1.22 over the course of training, aligning with the test MAE result and indicating good generalization to unseen data. Therefor, the recommendation system using Model 2 shows good result based on the metric (MAE) and is appropriate to give recommendation for Indonesia Tourism destinations.
 
 ## Conclusion
+This project aimed to solve two key problems:
+- First problem statement: How to create a personalized destination recommendation system based on destination data (like category and province).
+- Second problem statement: How to recommend other destinations based on user ratings.
 
+For the first problem, a content-based filtering model was built. It used TF-IDF to turn destination data into numbers and cosine similarity to measure how similar destinations are. This model achieved the goal of recommending destinations similar to those the user had already visited. The evaluation showed good performance in metrics like precision, recall, and NDCG. However, it was limited by the quality and availability of descriptive data and could not suggest completely new destinations.
+
+For the second problem, a collaborative filtering model (RecommenderNet) was developed. This model focused on learning from user ratings without needing destination data. It achieved the goal of recommending new, potentially interesting destinations by finding patterns in user behavior. The evaluation showed good top-10 results and MAE score (1.25). This approach was useful for overcoming the limits of content-based filtering and helped users discover new places.
+
+In summary, the content-based filtering model solved the first problem and achieved the first goal by using destination data and similarity. The collaborative filtering model solved the second problem and achieved the second goal by learning from user ratings. Both models successfully implemented the planned solutions: TF-IDF with cosine similarity for content-based filtering and deep learning for collaborative filtering.
+
+The results showed that each approach has its strengths. Content-based filtering works well when there is good destination data, but it’s limited when data is missing. Collaborative filtering works well when there is enough user interaction data, and it can suggest new destinations. Together, these models can improve destination recommendations for Indonesian tourists and can be further improved by combining both approaches in the future.
 
 ## References
 Permana, K. E., Rahmat, A. B., Wicaksana, D. A., & Ardianto, D. (2024). Collaborative filtering-based Madura Island tourism recommendation system using RecommenderNet. BIO Web of Conferences, 146, 01080. https://doi.org/10.1051/bioconf/202414601080
