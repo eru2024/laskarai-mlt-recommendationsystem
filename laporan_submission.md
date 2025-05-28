@@ -30,11 +30,11 @@ To achieve these goals, the project applies two recommendation system approaches
 
 ## Data Understanding
 
-The dataset used in this project is sourced from the Indonesia Tourism Destination dataset available on Kaggle ([link](https://www.kaggle.com/datasets/aprabowo/indonesia-tourism-destination?select=tourism_with_id.csv)). The dataset comprises approximately 400 unique tourist attractions distributed across five major Indonesian cities, dummy user data with 300 users, and a ratings dataset containing 10,000 entries of user-place interactions. The data presents an opportunity to build a recommendation system by leveraging both descriptive features of destinations and user ratings.
+The dataset used in this project is sourced from the Indonesia Tourism Destination dataset available on Kaggle ([link](https://www.kaggle.com/datasets/aprabowo/indonesia-tourism-destination?select=tourism_with_id.csv)). This dataset contains detailed information on 437 unique tourist attractions located across five major Indonesian cities, data for 300 users, and a ratings dataset comprising 10,000 entries of user-place interactions. This rich dataset provides an opportunity to develop a recommendation system that leverages both descriptive features of destinations and user-generated ratings.
 
 ### Variable Description
 This dataset also consists of 3 variables, namely:
-1. place: contains information on tourist attractions in 5 major cities in Indonesia totaling ~400
+1. place: contains information on 437 tourist attractions across 5 major cities in Indonesia
 2. user: contains dummy user data to make recommendation features based on user
 3. rating: contains 3 columns, namely the user, the place, and the rating given, serves to create a recommendation system based on the rating
 
@@ -73,9 +73,9 @@ Table 1 shows the summary for all table from the dataset. It shows the statistic
 </div>
 <br>
 
-The first graph in Image 1, "Count of Places by Category," details the categorical distribution of tourist destinations. "Taman Hiburan" (Amusement Park) represents the largest category with 135 attractions, closely followed by "Budaya" (Culture) with 117 attractions. "Cagar Alam" (Nature Reserve) comprises 106 attractions. Categories with fewer entries include "Bahari" (Marine) at 47, "Tempat Ibadah" (Places of Worship) at 17, and "Pusat Perbelanjaan" (Shopping Center) at 15. This categorical breakdown indicates a significant concentration of entertainment, cultural, and natural attractions within the dataset, with other categories being less prominent.
+The first graph in Image 1, "Count of Places by Category," details the categorical distribution of tourist destinations. The dataset’s 'Category' variable contains six distinct categories, with the most represented being 'Taman Hiburan' (135 places), followed by 'Budaya' (117), 'Cagar Alam' (106), 'Bahari' (47), 'Tempat Ibadah' (17), and 'Pusat Perbelanjaan' (15). This categorical breakdown indicates a significant concentration of entertainment, cultural, and natural attractions within the dataset, with other categories being less prominent.
 
-The second graph in Image 1, "Count of Places by City," illustrates the geographical distribution of these attractions across five major Indonesian cities. Yogyakarta and Bandung host the highest number of tourist destinations, with 126 and 124 attractions, respectively. Jakarta contains 84 attractions. Semarang and Surabaya have fewer attractions, with 57 and 46 respectively. This city-based analysis reveals that Yogyakarta and Bandung are primary locations for tourist destinations within this dataset, offering a broader range of attractions compared to Jakarta, Semarang, and Surabaya.
+The second graph in Image 1, "Count of Places by City," illustrates the geographical distribution of these attractions across five major Indonesian cities. The 'City' variable shows that Yogyakarta and Bandung contain the most tourist destinations, with 126 and 124 places respectively. Jakarta contains 84, Semarang 57, and Surabaya 46. This city-based analysis reveals that Yogyakarta and Bandung are primary locations for tourist destinations within this dataset, offering a broader range of attractions compared to Jakarta, Semarang, and Surabaya.
 
 **Image 2 Destination (Place) by Price**
 <div align="left">
@@ -91,7 +91,7 @@ Based on Image 2, the graph clearly shows a highly right-skewed distribution. A 
 </div>
 <br>
 
-Based on Image 3,the largest age group is 18-24 years old, comprising 87 users. The 30-34 age group follows closely with 75 users, while the 25-29 age group has 74 users. The 35-40 age group represents the smallest segment, with 64 users. This distribution indicates a relatively even spread of users across the younger adult age ranges (18-34), with a slight decrease in the oldest age bracket (35-40). The data reflects that the majority of users in the dataset fall within the 18 to 34 age range, consistent with the reported mean user age of 28.7 years.
+Based on Image 3, the largest age group is 18–24 years (87 users), followed by 30–34 (75 users) and 25–29 (74 users), with the smallest group being 35–40 years (64 users). This distribution aligns with the mean user age of 28.7 years.
 
 **Image 4 Rating Distribution**
 <div align="left">
@@ -99,7 +99,7 @@ Based on Image 3,the largest age group is 18-24 years old, comprising 87 users. 
 </div>
 <br>
 
-Based on Image 4, the distribution of ratings is relatively uniform across values 2, 3, 4, and 5, with each of these ratings having a frequency of over 2000. Rating 1 has a notably lower frequency, around 1700. This suggests that users generally provide positive feedback, as evidenced by the high counts for ratings 2 through 5. The mean rating of 3.07, as stated in the variable description, is consistent with this distribution, indicating a tendency for ratings to cluster around the middle to higher end of the scale.
+Based on Image 4, Ratings are fairly evenly spread across 2, 3, 4, and 5, each with over 2,000 entries. Ratings of 1 are less frequent (~1,700). The mean rating is 3.07, indicating a general tendency for positive feedback.
 
 To summarize, the dataset consists of three primary tables based Table 1 and all visualization:
 
@@ -116,7 +116,7 @@ To summarize, the dataset consists of three primary tables based Table 1 and all
 
 2. **user_df** — provides user demographic information such as:
    - `User_Id`: Unique user identifier (1–300).
-   - `Location`: User locations with 28 distinct values, some possibly inconsistent.
+   - `Location`: User locations with 28 distinct values, some possibly inconsistent of user's location name.
    - `Age`: User age ranging from 18 to 40 years, with a mean of 28.7.
 
 3. **rating_df** — captures user feedback through:
