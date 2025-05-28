@@ -151,34 +151,82 @@ Integrating user and place features with rating data enriches the dataset, enabl
 
 These data preparation steps collectively reduce noise, handle missing and extreme values, unify categorical features, and enrich the dataset, establishing a strong foundation for building an effective and accurate recommendation system.
 
-## Modeling
-### Model 1 - Content-Based Filtering
-
-The first recommendation approach implemented is a content-based filtering model. This method focuses on recommending places similar to those a user has previously visited by leveraging place-specific attributes. The primary advantage of this approach is its ability to provide personalized recommendations without requiring extensive user interaction data. However, it may suffer from limited diversity and difficulty recommending completely new or less-characterized places.
-
-The modeling process begins by preparing the feature data. A new combined feature, `Category_place__province`, is created by concatenating the place's category and province to better capture contextual similarities. This composite feature enables the model to consider both the type of attraction and its geographic location.
+### Data Preparation for Content-Based Filtering
+#### Feature Extraction by TF-IDF
+The content-based filtering model recommends places similar to those a user has visited, using place details. The first step is to create a new column in the dataset called Category_place__province, which combines the place’s category and its province. This combination helps the model consider both the type of place and its location. This is done with the code:
 
 ```python
 content_df = place_prep.copy()
 content_df['Category_place__province'] = content_df['Category'] + '__' + content_df['place_province']
-``` 
+```
 
-A TF-IDF vectorizer is applied to this combined text feature, transforming categorical data into a numerical representation. This step calculates the importance of each category-province term relative to all places, resulting in a sparse matrix of shape (437, 25), where rows represent places and columns represent unique category-province tokens.
+Next, the TF-IDF vectorizer is applied to this combined text feature. TF-IDF stands for Term Frequency-Inverse Document Frequency, a technique that turns text into numbers. It calculates how important a word (like “Taman Hiburan__Jawa Timur”) is across all places. This results in a matrix where each row represents a place and each column represents a unique word. The cell values tell how important that word is for the place. This step uses the following code:
 
 ```python
 tf = TfidfVectorizer()
 tfidf_matrix = tf.fit_transform(content_df['Category_place__province'])
 print(tfidf_matrix.shape)  # Output: (437, 25)
-``` 
+```
 
-Next, cosine similarity is computed between all pairs of places using the TF-IDF matrix. This similarity measure quantifies how alike two places are based on their combined category and province attributes, with higher values indicating greater similarity.
+This TF-IDF matrix (created by the code above) is essential for calculating similarity between places. In the modeling step, the model will compute cosine similarity between the rows of the TF-IDF matrix. Cosine similarity measures how similar two places are based on their combined category and province. The closer the value is to 1, the more similar the places are. This connection between the TF-IDF matrix and cosine similarity forms the basis for the recommendation model.
+
+### Data Preparation for Collaborative Filtering
+
+The collaborative filtering model predicts user preferences by learning from past user-place interactions, such as ratings. Before training, the raw data must be processed into a suitable numerical format.
+
+#### Encoding
+User IDs and place IDs are originally text labels, which cannot be directly used by machine learning models. These categorical strings are converted into numerical values using Label Encoding. This process assigns a unique integer to each user and each place.
+
+```python
+from sklearn.preprocessing import LabelEncoder
+
+user_enc = LabelEncoder()
+place_enc = LabelEncoder()
+
+df['user'] = user_enc.fit_transform(df['User_Id'])
+df['place'] = place_enc.fit_transform(df['Place_Id'])
+```
+
+Code snippet above shows that:
+- `LabelEncoder()` from scikit-learn converts textual IDs into numeric labels.
+- `fit_transform()` learns the unique labels and transforms them into integers.
+- This encoding creates new columns user and place in the dataset, which contain numerical identifiers for each user and place.
+
+#### Data Split
+
+The dataset is then divided into two parts:
+1. Training set (80%) for learning the patterns in user-place interactions.
+2. Testing set (20%) to evaluate the model’s performance on unseen data.
+
+Splitting ensures the model is validated properly and helps prevent overfitting.
+
+```python
+# Features and target
+X = df[['user', 'place']]
+y = df['Place_Ratings']
+
+# Split into train/test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+```
+
+Code snippet above shows that:
+- Train_test_split splits the encoded user and place pairs (X) and their ratings (y).
+- `test_size=0.2` reserves 20% of data for testing.
+- `random_state=42` fixes the random seed for reproducibility.
+
+## Modeling
+### Model 1 - Content-Based Filtering
+
+After preparing the TF-IDF matrix that represents place features, the next step is to build the recommendation model.
+
+The model uses cosine similarity to measure how similar each place is to every other place based on their TF-IDF representations. Cosine similarity compares the angle between two vectors, where a higher score (closer to 1) means the places share more similar characteristics (like category and province). This calculation is performed with the code:
 
 ```python
 cosine_sim = cosine_similarity(tfidf_matrix)
 cosine_sim_df = pd.DataFrame(cosine_sim, index=content_df['Place_Name'], columns=content_df['Place_Name'])
 ``` 
 
-To generate recommendations, the model retrieves the top-N most similar places for a given input place by sorting the cosine similarity scores. For example, when selecting "Waterpark Kenjeran Surabaya," the model recommends five other places categorized as amusement parks in the same province, demonstrating its ability to capture relevant, localized content similarity.
+After calculating similarities between places, the place_recommendations function retrieves the most similar places to a given input.
 
 ```python
 def place_recommendations(place_name, similarity_data=cosine_sim_df, items=content_df[['Place_Name', 'Category_place__province']], k=5):
@@ -187,6 +235,20 @@ def place_recommendations(place_name, similarity_data=cosine_sim_df, items=conte
     closest = closest.drop(place_name, errors='ignore')
     return pd.DataFrame(closest).merge(items).head(k)
 ```
+
+Here’s what happens step-by-step inside this function:
+
+1. `similarity_data.loc[:, place_name]` retrieves all similarity scores for the selected place.
+2. `.to_numpy()` converts these similarity scores into a NumPy array for easier handling.
+3. `argpartition(range(-1, -k, -1))` finds the indices of the top-k most similar places by selecting the largest similarity scores.
+4. `closest = similarity_data.columns[index[-1:-(k+2):-1]]` retrieves the names of these most similar places based on the indices.
+5. `closest = closest.drop(place_name, errors='ignore')` removes the input place itself from the list of recommendations to avoid self-recommendation.
+6. `merge(items)` attaches additional place information (such as category and province) to the recommendation list.
+7. `head(k)` returns the top-k recommendations.
+
+This function efficiently returns a ranked list of the k most similar places based on the content features (category and province). For instance, if a user chooses "Waterpark Kenjeran Surabaya," the function returns the top 5 similar places.
+
+By applying cosine similarity on the TF-IDF matrix and extracting the top matches, the model can generate personalized, content-based recommendations using only place features. This approach enables the system to provide meaningful suggestions without relying on explicit user interaction data.
 
 **Recommendation Output:**
 
@@ -209,22 +271,13 @@ Rekomendasi Tempat Lainnya
 While content-based filtering excels in interpretability and personalization, its limitation lies in the dependency on descriptive place features. It may not effectively recommend novel or diverse destinations if user history or place attributes are sparse or highly correlated.
 
 ### Model 2 - Collaborative Filtering
-The second approach in this recommendation system uses collaborative filtering, a method that predicts a user's interests by leveraging patterns in user-item interactions—specifically ratings provided by other users. This method is especially valuable when content metadata is limited or when user behavior signals are more informative than item descriptions.
 
-Collaborative filtering was implemented using a neural network-based architecture called RecommenderNet, which learns embeddings for users and places based on their interactions.
+The Collaborative Filtering model predicts a user’s preferences by learning patterns from ratings provided by different users. This approach does not depend on the features or descriptions of the places, but rather focuses on how users have rated them.
 
-To begin, user and place identifiers were label-encoded to convert categorical strings into numerical format:
-```python
-from sklearn.preprocessing import LabelEncoder
+The model is built using a deep learning architecture called `RecommenderNet`. Below is a breakdown of its structure and training process.
 
-user_enc = LabelEncoder()
-place_enc = LabelEncoder()
-
-df['user'] = user_enc.fit_transform(df['User_Id'])
-df['place'] = place_enc.fit_transform(df['Place_Id'])
-```
-
-The dataset was then split into training and testing sets (80/20). Then, the RecommenderNet model was defined with embedding layers to learn dense vector representations of users and places. The dot product of these embeddings was used to estimate rating scores:
+#### Model Structure – RecommenderNet
+The RecommenderNet model consists of the following layers and components:
 ```python
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Embedding, Dot, Flatten
@@ -243,11 +296,29 @@ class RecommenderNet(Model):
         return Flatten()(dot_user_place)
 ```
 
-The model was compiled and trained using Mean Squared Error (MSE) loss and the Adam optimizer. Early stopping was applied to avoid overfitting:
+The model structure based on the code snippet above consists of:
+- **Input Layers**: The model takes user IDs and place IDs (as integers) as input.
+- **Embedding Layers**: Map user and place IDs into 50-dimensional vectors. This allows the model to learn relationships in a compact space.
+    - Each user and place is represented as a dense vector of size 50 (controlled by embedding_size=50).
+    - Embeddings are initialized using He normal initialization for efficient training.
+    - L2 regularization (l2(1e-6)) is applied to embeddings to prevent overfitting.
+- **Dot Layer**: Computes the dot product between the user and place embeddings to quantify their interaction (a predicted rating or preference score). Calculates the similarity between the user and place embeddings, producing a predicted rating.
+- **Flatten Layer**: Converts the output into a scalar value representing the predicted rating by converting the dot product output into a flat structure (1D tensor). 
+
+This model architecture is design to effectively learn complex, hidden patterns in user-place interactions.
+
+#### Compile and Training Model
+
+As shown in the code snippet below, the model is compiled to define the objective of learning (loss function), the optimization method, and performance metrics. The Mean Squared Error (MSE) is used as the loss function to measure the difference between predicted and actual ratings. The Adam optimizer is applied for efficient training, and Mean Absolute Error (MAE) is used as an additional performance metric.
+
 ```python
 model = RecommenderNet(n_users, n_places)
 model.compile(loss='mse', optimizer='adam', metrics=['mae'])
+```
 
+As shown in the code snippet below, the model is trained using the training dataset, with a `batch size` of 64 and for up to 100 `epochs`. `EarlyStopping` is implemented to prevent overfitting, stopping the training process if the validation loss does not improve for 5 consecutive epochs.
+
+```python
 early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
 
 history = model.fit(
@@ -261,7 +332,9 @@ history = model.fit(
 )
 ```
 
-To generate recommendations, the model predicted scores for places the user had not yet visited. These were ranked, and the top N items were recommended:
+#### Generating Recommendations
+After training, the model predicts scores for user-place pairs that have not been visited. The predictions are sorted, and the top-N recommended places are selected.
+
 ```python
 # Predict for unseen places
 preds = model.predict([user_input, place_input], verbose=0)
@@ -269,6 +342,11 @@ top_idx = preds.flatten().argsort()[-10:][::-1]
 top_place_indexes = candidate_places[top_idx]
 recommended_place_ids = place_enc.inverse_transform(top_place_indexes)
 ```
+
+Explanation:
+- `user_input` and `place_input` represent the user and candidate places to score.
+- `preds` contains the predicted scores; the highest scores indicate the most likely recommendations.
+- `argsort()` sorts predictions; `inverse_transform()` decodes indices back to place names.
 
 **Output Example**
 
