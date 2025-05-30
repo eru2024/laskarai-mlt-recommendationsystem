@@ -523,11 +523,11 @@ After training the RecommenderNet model, predictions were generated on the test 
 
 The evaluation metrics on the test set are:
 
-* Test MSE: 2.1313
+* Test MSE: 2.1369
 
-* Test MAE: 1.2463
+* Test MAE: 1.2473
 
-These results indicate that, on average, the predicted ratings deviate by approximately 1.25 rating points from the actual values. The MSE further confirms that the model’s errors are moderately distributed but not extremely large.
+These results indicate that, on average, the predicted ratings deviate by +- 1.25 rating points from the actual values. The MSE further confirms that the model’s errors are moderately distributed but not extremely large.
 
 #### **Model Training History**
 
